@@ -21,7 +21,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager mSensorManager;
 
     // globally
-    private TextView myAwesomeTextView = (TextView)findViewById(R.id.myAwesomeTextView);
+    private TextView textView_X;
+    private TextView textView_Y;
+    private TextView textView_Z;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         .setAction("Action", null).show();
             }
         });
+
+        textView_X = (TextView)findViewById(R.id.textView_X);
+        textView_Y = (TextView)findViewById(R.id.textView_Y);
+        textView_Z = (TextView)findViewById(R.id.textView_Z);
 
         mSensorManager = (SensorManager) getSystemService(this.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -74,10 +80,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public final void onSensorChanged(SensorEvent event) {
         // The light sensor returns a single value.
         // Many sensors return 3 values, one for each axis.
-        float k = event.values[0];
+        float j = event.values[0];
+        float k = event.values[1];
+        float l = event.values[2];
         // Do something with this sensor value.
 
-        myAwesomeTextView.setText(k + "");
+        textView_X.setText("X: " + j + "");
+        textView_Y.setText("Y: " + k + "");
+        textView_Z.setText("Z: " + l + "");
     }
 
     @Override
