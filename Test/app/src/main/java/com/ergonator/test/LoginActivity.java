@@ -31,13 +31,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -52,8 +45,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
@@ -79,6 +70,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private UserRegisterTask mRegisTask = null;
     private String loginUrl = "http://10.231.227.151:3000/login";
     private String registrationUrl = "http://10.231.227.151:3000/register";
+    private String userID = "";
+    private String userToken = "";
 
     // UI references.
     private AutoCompleteTextView mUsernameView;
@@ -362,9 +355,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     String response = convertInputStreamToString(inputStream);
 
                     Log.e("LOGIN RESPONSE", response);
+
+                    JSONObject mainObject = new JSONObject(response);
+                    userID = mainObject.getString("_id");
+                    userToken = mainObject.getString("token");
+
                     return true;
-                    // From here you can convert the string to JSON with whatever JSON parser you like to use
-                    // After converting the string to JSON, I call my custom callback. You can follow this process too, or you can implement the onPostExecute(Result) method
                 } else {
                     // Status code is not 200
                     // Do something to handle the error
@@ -384,7 +380,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                Intent intentBundle = new Intent(LoginActivity.this, MainActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("_id", userID);
+                bundle.putString("token", userToken);
+                intentBundle.putExtras(bundle);
+                startActivity(intentBundle);
                 //finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
@@ -450,9 +451,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     String response = convertInputStreamToString(inputStream);
 
                     Log.e("REGISTRATION RESPONSE", response);
+
+                    JSONObject mainObject = new JSONObject(response);
+                    userID = mainObject.getString("_id");
+                    userToken = mainObject.getString("token");
+
                     return true;
-                    // From here you can convert the string to JSON with whatever JSON parser you like to use
-                    // After converting the string to JSON, I call my custom callback. You can follow this process too, or you can implement the onPostExecute(Result) method
+
                 } else {
                     // Status code is not 200
                     // Do something to handle the error
@@ -472,7 +477,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                Intent intentBundle = new Intent(LoginActivity.this, MainActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("_id", userID);
+                bundle.putString("token", userToken);
+                intentBundle.putExtras(bundle);
+                startActivity(intentBundle);
                 //finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

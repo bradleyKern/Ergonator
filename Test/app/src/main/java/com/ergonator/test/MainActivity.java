@@ -1,5 +1,7 @@
 package com.ergonator.test;
 
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -24,8 +26,21 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.sql.Time;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -40,8 +55,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView textView_Y;
     private TextView textView_Z;
     private Button serverButton;
-    private RequestQueue requestQueue;
-    private String url = "http://10.231.227.151:3000/data";
+    private String dataUrl = "http://10.231.227.151:3000/data";
+    private Timer dataCollectTimer;
+    private Timer dataSendTimer;
+    //collected data is separated by new lines
+    private String collectedData;
+    private SendDataTask mDataTask;
+    private String userID = "";
+    private String userToken = "";
 
     //All Sensor Data Values
     private float accelX = 0;
@@ -70,11 +91,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
+        Intent intentBundle = getIntent();
+        userID = intentBundle.getStringExtra("_id");
+        userToken = intentBundle.getStringExtra("token");
+
         textView_X = (TextView)findViewById(R.id.textView_X);
         textView_Y = (TextView)findViewById(R.id.textView_Y);
         textView_Z = (TextView)findViewById(R.id.textView_Z);
         serverButton = (Button)findViewById(R.id.serverButton);
-        requestQueue = Volley.newRequestQueue(this);
+
+        collectedData = "";
+
+        dataCollectTimer = new Timer();
+        dataCollectTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                collectData();
+            }
+
+        }, 0, 500);
+
+        dataSendTimer = new Timer();
+        dataSendTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                sendData();
+            }
+
+        }, 0, 10000);
 
         serverButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -88,45 +132,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Log.d("LAXVALUE", Float.toString(linAccelX));
                 Log.d("LAYVALUE", Float.toString(linAccelY));
                 Log.d("LAZVALUE", Float.toString(linAccelZ));
-                /*
-                StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                        new Response.Listener<String>()
-                        {
-                            @Override
-                            public void onResponse(String response) {
-                                // response
-                                Log.d("Response", response);
-                            }
-                        },
-                        new Response.ErrorListener()
-                        {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                // error
-                                Log.d("Error.Response", error.toString());
-                            }
-                        }
-                ) {
-                    @Override
-                    protected Map<String, String> getParams()
-                    {
-                        Map<String, String>  params = new HashMap<String, String>();
-                        params.put("User", "Bradley");
-                        params.put("MessageType", "Hi Ryan");
-                        params.put("AccelX", Float.toString(accelX));
-                        params.put("AccelY", Float.toString(accelY));
-                        params.put("AccelZ", Float.toString(accelZ));
-                        params.put("GyroX", Float.toString(gyroX));
-                        params.put("GyroY", Float.toString(gyroY));
-                        params.put("GyroZ", Float.toString(gyroZ));
-                        params.put("LinAccelX", Float.toString(linAccelX));
-                        params.put("LinAccelY", Float.toString(linAccelY));
-                        params.put("LinAccelZ", Float.toString(linAccelZ));
-
-                        return params;
-                    }
-                };
-                requestQueue.add(postRequest);*/
             }
         });
 
@@ -165,17 +170,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public final void onSensorChanged(SensorEvent event) {
-        // The light sensor returns a single value.
-        // Many sensors return 3 values, one for each axis.
-       /* float j = event.values[0];
-        float k = event.values[1];
-        float l = event.values[2];
-        // Do something with this sensor value.
-
-        textView_X.setText("X: " + j + "");
-        textView_Y.setText("Y: " + k + "");
-        textView_Z.setText("Z: " + l + "");*/
-
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             accelX = event.values[0];
             accelY = event.values[1];
@@ -206,4 +200,134 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onPause();
         mSensorManager.unregisterListener(this);
     }
+
+    private void collectData(){
+        String dataString = "";
+        dataString += accelX + ",";
+        dataString += accelY + ",";
+        dataString += accelZ + ",";
+        dataString += gyroX + ",";
+        dataString += gyroY + ",";
+        dataString += gyroZ + ",";
+        dataString += linAccelX + ",";
+        dataString += linAccelY + ",";
+        dataString += linAccelZ + ",";
+        dataString += Long.toString(System.currentTimeMillis());
+        dataString += "\n";
+        collectedData += dataString;
+        Log.e("TAG", "DATA COLLECTED");
+    }
+
+    private void sendData(){
+        Log.e("TAG", "ATTEMPTING TO SEND DATA");
+
+        if (mDataTask != null) {
+            return;
+        }
+
+        Map<String, String>  params = new HashMap<String, String>();
+        params.put("_id", userID);
+        params.put("token", userToken);
+        params.put("data", collectedData);
+
+        mDataTask = new SendDataTask(params);
+        collectedData = "";
+        mDataTask.execute((Void) null);
+    }
+
+    public class SendDataTask extends AsyncTask<Void, Void, Boolean> {
+
+        // This is the data we are sending
+        JSONObject postData;
+
+        // This is a constructor that allows you to pass in the JSON body
+        public SendDataTask(Map<String, String> postData) {
+            if (postData != null) {
+                this.postData = new JSONObject(postData);
+            }
+        }
+
+        // This is a function that we are overriding from AsyncTask. It takes Strings as parameters because that is what we defined for the parameters of our async task
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+                // This is getting the url from the string we passed in
+                URL url = new URL(dataUrl);
+
+                // Create the urlConnection
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+
+                urlConnection.setRequestMethod("POST");
+
+
+                // OPTIONAL - Sets an authorization header
+                urlConnection.setRequestProperty("Authorization", "someAuthString");
+
+                // Send the post body
+                if (this.postData != null) {
+                    OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream());
+                    writer.write(postData.toString());
+                    writer.flush();
+                }
+
+                int statusCode = urlConnection.getResponseCode();
+
+                if (statusCode == 200) {
+
+                    InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
+
+                    String response = convertInputStreamToString(inputStream);
+
+                    Log.e("DATA RESPONSE", response);
+                    return true;
+                    // From here you can convert the string to JSON with whatever JSON parser you like to use
+                    // After converting the string to JSON, I call my custom callback. You can follow this process too, or you can implement the onPostExecute(Result) method
+                } else {
+                    // Status code is not 200
+                    // Do something to handle the error
+                    Log.e("DATA ERROR", "Couldn't send data");
+                    return false;
+                }
+
+            } catch (Exception e) {
+                Log.d("TAG", e.getLocalizedMessage());
+                return false;
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mDataTask = null;
+
+            if (success) {
+                Log.e("DATAMESSAGE", "Data Sent");
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mDataTask = null;
+        }
+    }
+
+    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+        while((line = bufferedReader.readLine()) != null)
+            result += line;
+
+        inputStream.close();
+        return result;
+
+    }
+
 }
