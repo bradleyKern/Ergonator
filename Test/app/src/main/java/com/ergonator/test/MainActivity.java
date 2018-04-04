@@ -1,5 +1,7 @@
 package com.ergonator.test;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,12 +21,6 @@ import android.hardware.SensorManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -45,7 +41,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener, GraphFragment.OnFragmentInteractionListener {
 
     private Sensor mSensorAccel;
     private Sensor mSensorGyro;
@@ -54,13 +50,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorEventListener mSensorEventListener;
 
     // globally
-    private TextView textView_X;
-    private TextView textView_Y;
-    private TextView textView_Z;
-    private Button serverButton;
     private String dataUrl = "http://10.231.227.151:3000/data";
     private Timer dataCollectTimer;
     private Timer dataSendTimer;
+    private Button sendDataButton;
+    private Button viewGraphButton;
     //collected data is separated by new lines
     private String collectedData;
     private SendDataTask mDataTask;
@@ -82,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+       /* Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -92,38 +86,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
         Intent intentBundle = getIntent();
         userID = intentBundle.getStringExtra("_id");
         userToken = intentBundle.getStringExtra("token");
 
-        textView_X = (TextView)findViewById(R.id.textView_X);
-        textView_Y = (TextView)findViewById(R.id.textView_Y);
-        textView_Z = (TextView)findViewById(R.id.textView_Z);
-        serverButton = (Button)findViewById(R.id.serverButton);
+        sendDataButton = (Button)findViewById(R.id.send_data_button);
+        sendDataButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startSendingData();
+            }
+        });
+        viewGraphButton = (Button)findViewById(R.id.view_graph_button);
+        viewGraphButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showGraph();
+            }
+        });
 
         collectedData = "";
 
-        dataCollectTimer = new Timer();
-        dataCollectTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                collectData();
-            }
-
-        }, 0, 500);
-
-        dataSendTimer = new Timer();
-        dataSendTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                sendData();
-            }
-
-        }, 0, 10000);
-
-        GraphView graph = (GraphView) findViewById(R.id.graph);
+        /*GraphView graph = (GraphView) findViewById(R.id.graph);
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
                 new DataPoint(0, 1),
                 new DataPoint(1, 5),
@@ -131,9 +117,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 new DataPoint(3, 2),
                 new DataPoint(4, 6)
         });
-        graph.addSeries(series);
+        graph.addSeries(series);*/
 
-        serverButton.setOnClickListener(new View.OnClickListener() {
+        /*serverButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button
                 Log.d("AXVALUE", Float.toString(accelX));
@@ -146,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Log.d("LAYVALUE", Float.toString(linAccelY));
                 Log.d("LAZVALUE", Float.toString(linAccelZ));
             }
-        });
+        });*/
 
         mSensorManager = (SensorManager) getSystemService(this.SENSOR_SERVICE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -212,6 +198,36 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this);
+    }
+
+    private void startSendingData()
+    {
+        dataCollectTimer = new Timer();
+        dataCollectTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                collectData();
+            }
+
+        }, 0, 500);
+
+        dataSendTimer = new Timer();
+        dataSendTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                sendData();
+            }
+
+        }, 0, 10000);
+    }
+
+    private void showGraph()
+    {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        GraphFragment fragment = new GraphFragment();
+        fragmentTransaction.add(R.id.layout, fragment);
+        fragmentTransaction.commit();
     }
 
     private void collectData(){
@@ -343,4 +359,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    @Override
+    public void onFragmentInteraction(String uri) {
+        System.out.println(uri);
+    }
 }

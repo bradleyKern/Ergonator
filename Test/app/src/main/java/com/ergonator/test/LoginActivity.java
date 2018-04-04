@@ -114,6 +114,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        Button mDebugLoginButton = (Button) findViewById(R.id.debug_login);
+        mDebugLoginButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                debugLogin();
+            }
+        });
         //requestQueue = Volley.newRequestQueue(this);
 
         mLoginFormView = findViewById(R.id.login_form);
@@ -495,6 +502,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mRegisTask = null;
             showProgress(false);
         }
+    }
+
+    void debugLogin()
+    {
+        Intent intentBundle = new Intent(LoginActivity.this, MainActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("_id", "debugID");
+        bundle.putString("token", "debugToken");
+        intentBundle.putExtras(bundle);
+        startActivity(intentBundle);
     }
 
     private static String convertInputStreamToString(InputStream inputStream) throws IOException{
