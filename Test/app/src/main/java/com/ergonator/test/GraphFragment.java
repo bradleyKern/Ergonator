@@ -75,11 +75,11 @@ public class GraphFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_graph, container, false);
         GraphView graph = view.findViewById(R.id.graph);
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(0, 1),
-                new DataPoint(1, 5),
-                new DataPoint(2, 3),
-                new DataPoint(3, 2),
-                new DataPoint(4, 6)
+                new DataPoint(1, 1),
+                new DataPoint(2, 5),
+                new DataPoint(3, 3),
+                //new DataPoint(3, 2),
+                //new DataPoint(4, 6)
         });
         graph.addSeries(series);
 
