@@ -203,6 +203,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void startSendingData()
     {
+        startTime = System.currentTimeMillis();
+
         dataCollectTimer = new Timer();
         dataCollectTimer.schedule(new TimerTask() {
             @Override
@@ -221,8 +223,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         }, 0, 10000);
 
-        startTime = System.currentTimeMillis();
-
         sendDataButton.setText("Stop Sending Data");
         sendDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -237,6 +237,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         dataCollectTimer.cancel();
 
         dataSendTimer.cancel();
+
+        collectedData = "";
 
         sendDataButton.setText("Start Sending Data");
 
