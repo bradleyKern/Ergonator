@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SendDataTask mDataTask;
     private String userID = "";
     private String userToken = "";
+    private long startTime = 0;
 
     //All Sensor Data Values
     private float accelX = 0;
@@ -219,6 +220,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
 
         }, 0, 10000);
+
+        startTime = System.currentTimeMillis();
+
+        sendDataButton.setText("Stop Sending Data");
+        sendDataButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopSendingData();
+            }
+        });
+    }
+
+    private void stopSendingData()
+    {
+        dataCollectTimer.cancel();
+
+        dataSendTimer.cancel();
+
+        sendDataButton.setText("Start Sending Data");
+
+        sendDataButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startSendingData();
+            }
+        });
     }
 
     private void showGraph()
@@ -232,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void collectData(){
         String dataString = "";
+        dataString += (System.currentTimeMillis() - startTime) + ",";
         dataString += accelX + ",";
         dataString += accelY + ",";
         dataString += accelZ + ",";
