@@ -238,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         dataSendTimer.cancel();
 
-        collectedData = "";
+        sendData();
 
         sendDataButton.setText("Start Sending Data");
 
