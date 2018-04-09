@@ -28,6 +28,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -68,10 +69,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private UserLoginTask mAuthTask = null;
     private UserRegisterTask mRegisTask = null;
-    private String loginUrl = "http://10.231.227.151:3000/login";
-    private String registrationUrl = "http://10.231.227.151:3000/register";
+    private String loginUrl = "http://10.231.62.128:3000/login";
+    private String registrationUrl = "http://10.231.62.128:3000/register";
     private String userID = "";
     private String userToken = "";
+    private boolean isSupervisor = false;
 
     // UI references.
     private AutoCompleteTextView mUsernameView;
@@ -203,9 +205,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mUsernameView.setError(null);
         mPasswordView.setError(null);
 
+        CheckBox mSupervisor = (CheckBox) findViewById(R.id.supervisor);
+
         // Store values at the time of the login attempt.
         String username = mUsernameView.getText().toString();
         String password = mPasswordView.getText().toString();
+        isSupervisor = mSupervisor.isChecked();
 
         boolean cancel = false;
         View focusView = null;
@@ -241,6 +246,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             Map<String, String>  params = new HashMap<String, String>();
             params.put("username", username);
             params.put("password", password);
+            params.put("isSupervisor", isSupervisor + "");
 
             mRegisTask = new UserRegisterTask(params);
             mRegisTask.execute((Void) null);
