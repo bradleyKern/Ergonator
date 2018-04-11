@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorEventListener mSensorEventListener;
 
     // globally
-    private String dataUrl = "http://10.231.227.151:3000/data";
+    private String dataUrl = "http://10.231.62.128:3000/data";
     private Timer dataCollectTimer;
     private Timer dataSendTimer;
     private Button sendDataButton;
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void collectData(){
         String dataString = "";
-        dataString += (System.currentTimeMillis() - startTime) + ",";
+        dataString += ((System.currentTimeMillis() - startTime) / 100.0) + ",";
         dataString += accelX + ",";
         dataString += accelY + ",";
         dataString += accelZ + ",";
