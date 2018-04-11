@@ -4,11 +4,14 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -30,6 +33,8 @@ public class GraphFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private ImageView closeButton;
 
     private OnFragmentInteractionListener mListener;
 
@@ -74,6 +79,10 @@ public class GraphFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_graph, container, false);
         GraphView graph = view.findViewById(R.id.graph);
+        graph.setTitle("TestGraph");
+        GridLabelRenderer glr = graph.getGridLabelRenderer();
+        glr.setHorizontalAxisTitle("Time");
+        glr.setVerticalAxisTitle("Risk Level");
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
                 new DataPoint(1, 1),
                 new DataPoint(2, 5),
@@ -82,6 +91,16 @@ public class GraphFragment extends Fragment {
                 //new DataPoint(4, 6)
         });
         graph.addSeries(series);
+
+        closeButton = (ImageView)view.findViewById(R.id.closeButton);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.e("TEST", "BACK BUTTON CLICKED");
+                //getActivity().getFragmentManager().popBackStack();
+                getActivity().onBackPressed();
+            }
+        });
 
         return view;
     }
