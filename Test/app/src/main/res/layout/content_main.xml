@@ -54,23 +54,12 @@
         app:layout_constraintTop_toBottomOf="@+id/topBar">
 
         <ImageView
-            android:id="@+id/torso"
+            android:id="@+id/silhouette"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/SilhouetteTorsoGrayscale" />
-
-        <ImageView
-            android:id="@+id/arms"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/SilhouetteArmsGrayscale" />
-
-        <ImageView
-            android:id="@+id/legs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/SilhouetteLegsGrayscale" />
-
+            android:alpha="1"
+            android:tintMode="screen"
+            app:srcCompat="@drawable/male_green" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
