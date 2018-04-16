@@ -5,6 +5,8 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +15,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import android.speech.SpeechRecognizer;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -36,6 +40,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -48,6 +53,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor mSensorLinAccel;
     private SensorManager mSensorManager;
     private SensorEventListener mSensorEventListener;
+
+    //Speech stuff
+    private SpeechRecognizer mSpeech;
+    private Intent speechIntent;
+    private ArrayList<String> speechResults;
 
     // globally
     private String dataUrl = "http://10.231.62.128:3000/data";
@@ -120,25 +130,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
         graph.addSeries(series);*/
 
-        /*serverButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Code here executes on main thread after user presses button
-                Log.d("AXVALUE", Float.toString(accelX));
-                Log.d("AYVALUE", Float.toString(accelY));
-                Log.d("AZVALUE", Float.toString(accelZ));
-                Log.d("GXVALUE", Float.toString(gyroX));
-                Log.d("GYVALUE", Float.toString(gyroY));
-                Log.d("GZVALUE", Float.toString(gyroZ));
-                Log.d("LAXVALUE", Float.toString(linAccelX));
-                Log.d("LAYVALUE", Float.toString(linAccelY));
-                Log.d("LAZVALUE", Float.toString(linAccelZ));
-            }
-        });*/
-
         mSensorManager = (SensorManager) getSystemService(this.SENSOR_SERVICE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mSensorLinAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+
+        mSpeech = SpeechRecognizer.createSpeechRecognizer(this);
+
+        mSpeech.setRecognitionListener(new speechListener());
+
+        speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,"com.ergonator.test");
+
+        speechIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,5);
+
+        mSpeech.startListening(speechIntent);
     }
 
     @Override
@@ -392,5 +399,67 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onFragmentInteraction(String uri) {
         System.out.println(uri);
+    }
+
+    public class speechListener implements RecognitionListener
+    {
+
+        @Override
+        public void onReadyForSpeech(Bundle bundle) {
+        }
+
+        @Override
+        public void onBeginningOfSpeech() {
+        }
+
+        @Override
+        public void onRmsChanged(float v) {
+
+        }
+
+        @Override
+        public void onBufferReceived(byte[] bytes) {
+
+        }
+
+        @Override
+        public void onEndOfSpeech() {
+        }
+
+        @Override
+        public void onError(int i) {
+        }
+
+        @Override
+        public void onResults(Bundle results) {
+            String str = new String();
+            speechResults = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            for (int i = 0; i < speechResults.size(); i++)
+            {
+                str += speechResults.get(i) + ",";
+                if (speechResults.get(i).toLowerCase().contains("start")) {
+                    Log.d("Speech:", "START DETECTED");
+                    break;
+                }
+
+                if (speechResults.get(i).toLowerCase().contains("stop")) {
+                    Log.d("Speech:", "STOP DETECTED");
+                    break;
+                }
+            }
+            Log.d("results: ", str);
+
+            mSpeech.startListening(speechIntent);
+        }
+
+        @Override
+        public void onPartialResults(Bundle bundle) {
+
+        }
+
+        @Override
+        public void onEvent(int i, Bundle bundle) {
+
+        }
     }
 }
