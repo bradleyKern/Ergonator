@@ -3,8 +3,12 @@ package com.ergonator.test;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Vibrator;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.support.design.widget.FloatingActionButton;
@@ -59,6 +63,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Intent speechIntent;
     private ArrayList<String> speechResults;
 
+    //Vibrator
+    private Vibrator v;
+    private long[] vibePatt = {0, 200, 200, 200};
+
+    //Audio
+    private MediaPlayer mpWait;
+    private MediaPlayer mpBegin;
+
     // globally
     private String dataUrl = "http://10.231.62.128:3000/data";
     private Timer dataCollectTimer;
@@ -102,6 +114,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Intent intentBundle = getIntent();
         userID = intentBundle.getStringExtra("_id");
         userToken = intentBundle.getStringExtra("token");
+
+        v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
+        mpWait = MediaPlayer.create(this, R.raw.wait);
+        mpBegin = MediaPlayer.create(this, R.raw.begin);
 
         sendDataButton = (Button)findViewById(R.id.send_data_button);
         sendDataButton.setOnClickListener(new View.OnClickListener() {
@@ -200,47 +216,94 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.registerListener(this, mSensorAccel, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mSensorGyro, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, mSensorLinAccel, SensorManager.SENSOR_DELAY_NORMAL);
+
+        mSpeech = SpeechRecognizer.createSpeechRecognizer(this);
+
+        mSpeech.setRecognitionListener(new speechListener());
+
+        speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,"com.ergonator.test");
+
+        speechIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,5);
+
+        mSpeech.startListening(speechIntent);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        mSpeech.stopListening();
+        mSpeech.cancel();
+        mSpeech.destroy();
+        mSensorManager.unregisterListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mSpeech.stopListening();
+        mSpeech.cancel();
+        mSpeech.destroy();
+        mSensorManager.unregisterListener(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mSpeech.stopListening();
+        mSpeech.cancel();
+        mSpeech.destroy();
         mSensorManager.unregisterListener(this);
     }
 
     private void startSendingData()
     {
-        startTime = System.currentTimeMillis();
+        sendDataButton.setText("Starting...");
+        //v.vibrate(400);
 
-        dataCollectTimer = new Timer();
-        dataCollectTimer.schedule(new TimerTask() {
-            @Override
+        mpWait.start();
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             public void run() {
-                collectData();
+                startTime = System.currentTimeMillis();
+
+                dataCollectTimer = new Timer();
+                dataCollectTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        collectData();
+                    }
+
+                }, 0, 500);
+
+                dataSendTimer = new Timer();
+                dataSendTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        sendData();
+                    }
+
+                }, 0, 10000);
+
+                sendDataButton.setText("Stop Sending Data");
+                sendDataButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        stopSendingData();
+                    }
+                });
+
+                //v.vibrate(vibePatt, -1);
+                mpBegin.start();
             }
-
-        }, 0, 500);
-
-        dataSendTimer = new Timer();
-        dataSendTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                sendData();
-            }
-
-        }, 0, 10000);
-
-        sendDataButton.setText("Stop Sending Data");
-        sendDataButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                stopSendingData();
-            }
-        });
+        }, 3000);
     }
 
     private void stopSendingData()
     {
+        v.vibrate(400);
         dataCollectTimer.cancel();
 
         dataSendTimer.cancel();
@@ -406,6 +469,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         @Override
         public void onReadyForSpeech(Bundle bundle) {
+            Log.d("Speech:", "Begin speech");
         }
 
         @Override
@@ -414,12 +478,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         @Override
         public void onRmsChanged(float v) {
-
         }
 
         @Override
         public void onBufferReceived(byte[] bytes) {
-
         }
 
         @Override
@@ -428,28 +490,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         @Override
         public void onError(int i) {
+            if (i == 6)
+                mSpeech.startListening(speechIntent);
         }
 
         @Override
         public void onResults(Bundle results) {
-            String str = new String();
             speechResults = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             for (int i = 0; i < speechResults.size(); i++)
             {
-                str += speechResults.get(i) + ",";
-                if (speechResults.get(i).toLowerCase().contains("start")) {
+                String word = speechResults.get(i).toLowerCase();
+
+                if (word.contains("rgo") && word.contains("start")) {
                     Log.d("Speech:", "START DETECTED");
+                    startSendingData();
                     break;
                 }
 
-                if (speechResults.get(i).toLowerCase().contains("stop")) {
+                if (word.contains("rgo") && word.toLowerCase().contains("stop")) {
                     Log.d("Speech:", "STOP DETECTED");
+                    stopSendingData();
                     break;
                 }
             }
-            Log.d("results: ", str);
-
-            mSpeech.startListening(speechIntent);
         }
 
         @Override
