@@ -37,6 +37,8 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -276,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         collectData();
                     }
 
-                }, 0, 500);
+                }, 0, 8);
 
                 dataSendTimer = new Timer();
                 dataSendTimer.schedule(new TimerTask() {
@@ -285,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         sendData();
                     }
 
-                }, 0, 10000);
+                }, 15000, 15000);
 
                 sendDataButton.setText("Stop Sending Data");
                 sendDataButton.setOnClickListener(new View.OnClickListener() {
@@ -335,13 +337,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         dataString += accelX + ",";
         dataString += accelY + ",";
         dataString += accelZ + ",";
-        dataString += gyroX + ",";
-        dataString += gyroY + ",";
-        dataString += gyroZ + ",";
         dataString += linAccelX + ",";
         dataString += linAccelY + ",";
         dataString += linAccelZ + ",";
-        dataString += Long.toString(System.currentTimeMillis());
+        dataString += gyroX + ",";
+        dataString += gyroY + ",";
+        dataString += gyroZ;
         dataString += "\n";
         collectedData += dataString;
         Log.e("TAG", "DATA COLLECTED");
@@ -401,6 +402,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 // Send the post body
                 if (this.postData != null) {
+                    //Make the file we want to send
+                    /*File file = new File(getFilesDir(), "postData");
+                    FileOutputStream outputStream;
+
+                    try {
+                        outputStream = openFileOutput("postData", MODE_PRIVATE);
+                        outputStream.write(postData.toString().getBytes());
+                        outputStream.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }*/
+
                     OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream());
                     writer.write(postData.toString());
                     writer.flush();
