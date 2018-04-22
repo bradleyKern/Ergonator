@@ -52,7 +52,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener, GraphFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener, GraphFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
 
     private Sensor mSensorAccel;
     private Sensor mSensorGyro;
@@ -73,12 +73,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private MediaPlayer mpWait;
     private MediaPlayer mpBegin;
 
+    //sensor settings
+    private int samplingRate = 8; //sampling rate in milliseconds
+    private int timeShift = 15000; //time between data transfer in milliseconds
+
     // globally
     private String dataUrl = "http://10.231.62.128:3000/data";
     private Timer dataCollectTimer;
     private Timer dataSendTimer;
     private Button sendDataButton;
     private Button viewGraphButton;
+    private Button viewSettingsButton;
+
     //collected data is separated by new lines
     private String collectedData;
     private SendDataTask mDataTask;
@@ -117,6 +123,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         userID = intentBundle.getStringExtra("_id");
         userToken = intentBundle.getStringExtra("token");
 
+        if (intentBundle.getStringExtra("rate") != null) {
+            samplingRate = Integer.parseInt(intentBundle.getStringExtra("rate"));
+            timeShift = Integer.parseInt(intentBundle.getStringExtra("time"));
+        }
+
         v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
         mpWait = MediaPlayer.create(this, R.raw.wait);
         mpBegin = MediaPlayer.create(this, R.raw.begin);
@@ -128,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 startSendingData();
             }
         });
+
         viewGraphButton = (Button)findViewById(R.id.view_graph_button);
         viewGraphButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,17 +148,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
+        viewSettingsButton = (Button)findViewById(R.id.settings);
+        viewSettingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showSettings();
+            }
+        });
+
         collectedData = "";
 
-        /*GraphView graph = (GraphView) findViewById(R.id.graph);
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(0, 1),
-                new DataPoint(1, 5),
-                new DataPoint(2, 3),
-                new DataPoint(3, 2),
-                new DataPoint(4, 6)
-        });
-        graph.addSeries(series);*/
+
 
         mSensorManager = (SensorManager) getSystemService(this.SENSOR_SERVICE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -262,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void startSendingData()
     {
         sendDataButton.setText("Starting...");
-        //v.vibrate(400);
+        v.vibrate(400);
 
         mpWait.start();
 
@@ -278,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         collectData();
                     }
 
-                }, 0, 8);
+                }, 0, samplingRate);
 
                 dataSendTimer = new Timer();
                 dataSendTimer.schedule(new TimerTask() {
@@ -287,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         sendData();
                     }
 
-                }, 15000, 15000);
+                }, timeShift, timeShift);
 
                 sendDataButton.setText("Stop Sending Data");
                 sendDataButton.setOnClickListener(new View.OnClickListener() {
@@ -297,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
                 });
 
-                //v.vibrate(vibePatt, -1);
+                v.vibrate(vibePatt, -1);
                 mpBegin.start();
             }
         }, 3000);
@@ -322,6 +334,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
     }
 
+    //shows the graph fragment
     private void showGraph()
     {
         FragmentManager fragmentManager = getFragmentManager();
@@ -329,6 +342,44 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         GraphFragment fragment = new GraphFragment();
         fragmentTransaction.add(R.id.layout, fragment);
         fragmentTransaction.commit();
+    }
+
+    //Shows the settings fragment
+    private void showSettings()
+    {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        SettingsFragment fragment = new SettingsFragment();
+        fragmentTransaction.add(R.id.layout, fragment);
+        fragmentTransaction.commit();
+    }
+
+    /**
+     * sets the Sampling rate for the sensors
+     * This passed in value needs to be converted into nearest
+     * millisecond integer value. These are hardcoded for calculation
+     * saving.
+     * @param newRate the new rate in samples/second
+     */
+    public void setSamplingRate(int newRate)
+    {
+        switch (newRate)
+        {
+            case 125:
+                samplingRate = 8;
+                break;
+            case 150:
+                samplingRate = 7;
+                break;
+            case 175:
+                samplingRate = 6;
+                break;
+            case 200:
+                samplingRate = 5;
+                break;
+        }
+
+        Log.d("NEW RATE", "" + newRate);
     }
 
     private void collectData(){
@@ -345,11 +396,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         dataString += gyroZ;
         dataString += "\n";
         collectedData += dataString;
-        Log.e("TAG", "DATA COLLECTED");
+        //Log.e("TAG", "DATA COLLECTED");
     }
 
     private void sendData(){
-        Log.e("TAG", "ATTEMPTING TO SEND DATA");
+        //Log.e("TAG", "ATTEMPTING TO SEND DATA");
 
         if (mDataTask != null) {
             return;
@@ -358,6 +409,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Map<String, String>  params = new HashMap<String, String>();
         params.put("_id", userID);
         params.put("token", userToken);
+        params.put("rate", (1000.0 / samplingRate) + "");
+        params.put("time", (timeShift / 1000) + "");
         params.put("data", collectedData);
 
         mDataTask = new SendDataTask(params);
@@ -482,7 +535,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         @Override
         public void onReadyForSpeech(Bundle bundle) {
-            Log.d("Speech:", "Begin speech");
+            //Log.d("Speech:", "Begin speech");
         }
 
         @Override
@@ -515,17 +568,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 String word = speechResults.get(i).toLowerCase();
 
                 if (word.contains("rgo") && word.contains("start")) {
-                    Log.d("Speech:", "START DETECTED");
+                    //Log.d("Speech:", "START DETECTED");
                     startSendingData();
                     break;
                 }
 
                 if (word.contains("rgo") && word.toLowerCase().contains("stop")) {
-                    Log.d("Speech:", "STOP DETECTED");
+                    //Log.d("Speech:", "STOP DETECTED");
                     stopSendingData();
                     break;
                 }
             }
+
+            mSpeech.startListening(speechIntent);
         }
 
         @Override

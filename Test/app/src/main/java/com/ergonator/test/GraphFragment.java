@@ -1,5 +1,7 @@
 package com.ergonator.test;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,6 +38,8 @@ public class GraphFragment extends Fragment {
 
     private ImageView closeButton;
 
+    private GraphFragment fragment;
+
     private OnFragmentInteractionListener mListener;
 
     public interface OnFragmentInteractionListener {
@@ -43,7 +47,6 @@ public class GraphFragment extends Fragment {
     }
 
     public GraphFragment() {
-        // Required empty public constructor
     }
 
     /**
@@ -79,7 +82,7 @@ public class GraphFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_graph, container, false);
         GraphView graph = view.findViewById(R.id.graph);
-        graph.setTitle("TestGraph");
+        graph.setTitle("RiskGraph");
         GridLabelRenderer glr = graph.getGridLabelRenderer();
         glr.setHorizontalAxisTitle("Time");
         glr.setVerticalAxisTitle("Risk Level");
@@ -92,13 +95,23 @@ public class GraphFragment extends Fragment {
         });
         graph.addSeries(series);
 
+        fragment = this;
+
         closeButton = (ImageView)view.findViewById(R.id.closeButton);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.e("TEST", "BACK BUTTON CLICKED");
                 //getActivity().getFragmentManager().popBackStack();
-                getActivity().onBackPressed();
+                FragmentManager fragmentManager = getFragmentManager();
+                // Check to see if the fragment is already showing.
+
+                if (fragment != null) {
+                    // Create and commit the transaction to remove the fragment.
+                    FragmentTransaction fragmentTransaction =
+                            fragmentManager.beginTransaction();
+                    fragmentTransaction.remove(fragment).commit();
+                }
             }
         });
 
@@ -128,15 +141,4 @@ public class GraphFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
 }
