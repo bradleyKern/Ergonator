@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button sendDataButton;
     private Button viewGraphButton;
     private Button viewSettingsButton;
+    private boolean inFragment = false;
 
     //collected data is separated by new lines
     private String collectedData;
@@ -144,6 +145,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         viewGraphButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mSpeech.stopListening();
+                inFragment = true;
                 showGraph();
             }
         });
@@ -152,13 +155,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         viewSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mSpeech.stopListening();
+                inFragment = true;
                 showSettings();
             }
         });
 
         collectedData = "";
-
-
 
         mSensorManager = (SensorManager) getSystemService(this.SENSOR_SERVICE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -344,24 +347,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         fragmentTransaction.commit();
     }
 
+    public void returnFromGraph()
+    {
+        inFragment = false;
+        mSpeech.startListening(speechIntent);
+    }
+
     //Shows the settings fragment
     private void showSettings()
     {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        SettingsFragment fragment = new SettingsFragment();
+        SettingsFragment fragment = SettingsFragment.newInstance(""+samplingRate, ""+timeShift);
         fragmentTransaction.add(R.id.layout, fragment);
         fragmentTransaction.commit();
     }
 
     /**
-     * sets the Sampling rate for the sensors
+     * Returning from Settings screen
      * This passed in value needs to be converted into nearest
      * millisecond integer value. These are hardcoded for calculation
      * saving.
      * @param newRate the new rate in samples/second
+     * @param newTime the new time between data uploads
      */
-    public void setSamplingRate(int newRate)
+    public void returnFromSettings(int newRate, int newTime)
     {
         switch (newRate)
         {
@@ -379,7 +389,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 break;
         }
 
+        //convert to milliseconds by multiplying by 1000
+        timeShift = newTime * 1000;
+
         Log.d("NEW RATE", "" + newRate);
+
+        inFragment = false;
+        mSpeech.startListening(speechIntent);
     }
 
     private void collectData(){
@@ -556,7 +572,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         @Override
         public void onError(int i) {
-            if (i == 6)
+            if (i == 6 && !inFragment)
                 mSpeech.startListening(speechIntent);
         }
 
@@ -580,7 +596,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
 
-            mSpeech.startListening(speechIntent);
+            if (!inFragment)
+                mSpeech.startListening(speechIntent);
         }
 
         @Override

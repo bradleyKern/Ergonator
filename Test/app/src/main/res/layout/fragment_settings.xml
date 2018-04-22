@@ -17,7 +17,7 @@
             android:layout_width="30dp"
             android:layout_height="33dp"
             android:layout_marginBottom="40dp"
-            android:src="@color/colorAccent"
+            android:src="@android:drawable/ic_menu_revert"
             app:layout_constraintBottom_toTopOf="@+id/samplingRateBar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -55,8 +55,8 @@
 
         <TextView
             android:id="@+id/rateNum"
-            android:layout_width="66dp"
-            android:layout_height="wrap_content"
+            android:layout_width="42dp"
+            android:layout_height="28dp"
             android:layout_marginBottom="11dp"
             android:layout_marginEnd="61dp"
             android:layout_marginTop="33dp"
@@ -80,6 +80,75 @@
             app:layout_constraintStart_toEndOf="@+id/closeButton"
             app:layout_constraintStart_toStartOf="parent"
             tools:layout_editor_absoluteY="0dp" />
+
+        <TextView
+            android:id="@+id/rateDesc"
+            android:layout_width="222dp"
+            android:layout_height="21dp"
+            android:text="How often sensor data is collected"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.197" />
+
+        <TextView
+            android:id="@+id/timeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sending Rate"
+            android:textAppearance="@android:style/TextAppearance.Material.Large"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.063"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.376" />
+
+        <SeekBar
+            android:id="@+id/timeBar"
+            style="@android:style/Widget.DeviceDefault.SeekBar"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:max="45"
+            android:progress="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.435" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="20dp" />
+
+        <TextView
+            android:id="@+id/timeNum"
+            android:layout_width="28dp"
+            android:layout_height="wrap_content"
+            android:text="15"
+            android:textAppearance="@android:style/TextAppearance.Material.Large"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.814"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.376" />
+
+        <TextView
+            android:id="@+id/timeDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="How often sensor data is sent to the server"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
 

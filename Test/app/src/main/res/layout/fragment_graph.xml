@@ -10,13 +10,13 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/background_light">
+        android:background="@android:color/darker_gray">
 
         <ImageView
             android:id="@+id/closeButton"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="?android:attr/textColorLink"
+            android:src="@android:drawable/ic_menu_revert"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

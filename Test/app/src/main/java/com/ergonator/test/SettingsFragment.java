@@ -32,13 +32,20 @@ public class SettingsFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private int rate;
+    private int time;
 
     private ImageView closeButton;
 
     private SettingsFragment fragment;
     private SeekBar rateBar;
+    private SeekBar timeBar;
 
+    //constants
     private final int SAMPLING_RATE_MINIMUM = 125;
+    private final int SAMPLING_RATE_INCREMENT = 15;
+    private final int TIME_RATE_MINIMUM = 15;
+    private final int TIME_RATE_INCREMENT = 15;
 
     private OnFragmentInteractionListener mListener;
 
@@ -73,6 +80,30 @@ public class SettingsFragment extends Fragment {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+
+            rate = Integer.parseInt(mParam1);
+
+            //convert rate from millisecond timing to amount per second
+            switch (rate)
+            {
+                case 8:
+                    rate = 125;
+                    break;
+                case 7:
+                    rate = 150;
+                    break;
+                case 6:
+                    rate = 175;
+                    break;
+                case 5:
+                    rate = 200;
+                    break;
+            }
+
+            rate -= SAMPLING_RATE_MINIMUM;
+
+            time = Integer.parseInt(mParam2) / 1000;
+            time -= TIME_RATE_MINIMUM;
         }
     }
 
@@ -85,16 +116,42 @@ public class SettingsFragment extends Fragment {
 
         closeButton = (ImageView)view.findViewById(R.id.closeButton);
         rateBar = (SeekBar) view.findViewById(R.id.samplingRateBar);
+        rateBar.setProgress(rate);
+        timeBar = (SeekBar) view.findViewById(R.id.timeBar);
+        timeBar.setProgress(time);
 
         final TextView rateValue = (TextView)view.findViewById(R.id.rateNum);
+        rateValue.setText(String.valueOf(rate + SAMPLING_RATE_MINIMUM));
+        final TextView timeValue = (TextView)view.findViewById(R.id.timeNum);
+        timeValue.setText(String.valueOf(time + TIME_RATE_MINIMUM));
 
         rateBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                progress = (int) Math.round(progress / 25.0);
-                progress = progress * 25;
+                progress = (int) Math.round(progress / ((double)SAMPLING_RATE_INCREMENT));
+                progress = progress * SAMPLING_RATE_INCREMENT;
                 seekBar.setProgress(progress);
                 rateValue.setText(String.valueOf(progress + SAMPLING_RATE_MINIMUM));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        timeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                progress = (int) Math.round(progress / ((double)TIME_RATE_INCREMENT));
+                progress = progress * TIME_RATE_INCREMENT;
+                seekBar.setProgress(progress);
+                timeValue.setText(String.valueOf(progress + TIME_RATE_MINIMUM));
             }
 
             @Override
@@ -115,7 +172,7 @@ public class SettingsFragment extends Fragment {
                 // Check to see if the fragment is already showing.
 
                 if (fragment != null) {
-                    ((MainActivity) getActivity()).setSamplingRate(rateBar.getProgress() + SAMPLING_RATE_MINIMUM);
+                    ((MainActivity) getActivity()).returnFromSettings(rateBar.getProgress() + SAMPLING_RATE_MINIMUM, timeBar.getProgress() + TIME_RATE_MINIMUM);
 
                     // Create and commit the transaction to remove the fragment.
                     FragmentTransaction fragmentTransaction =

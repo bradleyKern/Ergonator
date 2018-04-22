@@ -107,6 +107,7 @@ public class GraphFragment extends Fragment {
                 // Check to see if the fragment is already showing.
 
                 if (fragment != null) {
+                    ((MainActivity) getActivity()).returnFromGraph();
                     // Create and commit the transaction to remove the fragment.
                     FragmentTransaction fragmentTransaction =
                             fragmentManager.beginTransaction();
