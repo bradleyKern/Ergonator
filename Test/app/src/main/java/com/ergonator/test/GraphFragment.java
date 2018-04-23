@@ -3,6 +3,7 @@ package com.ergonator.test;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -83,9 +84,17 @@ public class GraphFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_graph, container, false);
         GraphView graph = view.findViewById(R.id.graph);
         graph.setTitle("RiskGraph");
-        GridLabelRenderer glr = graph.getGridLabelRenderer();
-        glr.setHorizontalAxisTitle("Time");
-        glr.setVerticalAxisTitle("Risk Level");
+        graph.setTitleTextSize(144f);
+        graph.setTitleColor(Color.parseColor("#ffffff"));
+        GridLabelRenderer label =  graph.getGridLabelRenderer();
+        label.setGridColor(Color.parseColor("#ffffff"));
+        label.setHorizontalAxisTitle("Time");
+        label.setHorizontalAxisTitleColor(Color.parseColor("#ffffff"));
+        label.setVerticalAxisTitle("Risk Level");
+        label.setVerticalAxisTitleColor(Color.parseColor("#ffffff"));
+        label.setHorizontalLabelsColor(Color.parseColor("#ffffff"));
+        label.setVerticalLabelsColor(Color.parseColor("#ffffff"));
+        graph.getViewport().setBackgroundColor(Color.parseColor("#000000"));
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
                 new DataPoint(1, 1),
                 new DataPoint(2, 5),
