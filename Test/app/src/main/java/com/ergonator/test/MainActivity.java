@@ -3,9 +3,11 @@ package com.ergonator.test;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -115,6 +117,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float linAccelY = 0;
     private float linAccelZ = 0;
 
+    //battery
+    private IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+    Intent batteryStatus;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,6 +134,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             samplingRate = Integer.parseInt(intentBundle.getStringExtra("rate"));
             timeShift = Integer.parseInt(intentBundle.getStringExtra("time"));
         }
+
+        //battery
+         batteryStatus = this.registerReceiver(null, ifilter);
 
         //setting up notification things
         v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
@@ -355,6 +364,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
     }
 
+    private void batteryLow()
+    {
+        dataSendTimer.cancel();
+        dataCollectTimer.cancel();
+        v.vibrate(1000);
+        mSpeech.cancel();
+        sendDataButton.setText("Battery Low!");
+        sendDataButton.setOnClickListener(null);
+    }
+
     //shows the graph fragment
     private void showGraph()
     {
@@ -450,6 +469,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mDataTask = new SendDataTask(params);
         collectedData = "";
         mDataTask.execute((Void) null);
+
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        float batteryPct = level / (float)scale;
+        Log.d("Battery", batteryPct + "");
+
+        //If battery is less than 10% we stop
+        if (batteryPct < 0.1) {
+            batteryLow();
+        }
+
     }
 
     protected static String convertInputStreamToString(InputStream inputStream) throws IOException {
