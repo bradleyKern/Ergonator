@@ -37,16 +37,20 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -78,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int timeShift = 15000; //time between data transfer in milliseconds
 
     // globally
-    private String dataUrl = "http://10.231.62.128:3000/data";
     private Timer dataCollectTimer;
     private Timer dataSendTimer;
     private Button sendDataButton;
@@ -88,10 +91,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     //collected data is separated by new lines
     private String collectedData;
-    private SendDataTask mDataTask;
+    protected static SendDataTask mDataTask;
     private String userID = "";
     private String userToken = "";
     private long startTime = 0;
+
+    //risk values
+    private String riskUrl = "http://10.231.62.128:3000/history";
+    private ArrayList<Integer> pushDuration;
+    private ArrayList<Integer> liftDuration;
+    private ArrayList<Integer> pushFrequency;
+    private ArrayList<Integer> liftFrequency;
+
 
     //All Sensor Data Values
     private float accelX = 0;
@@ -108,17 +119,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       /* Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
         Intent intentBundle = getIntent();
         userID = intentBundle.getStringExtra("_id");
@@ -129,10 +129,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             timeShift = Integer.parseInt(intentBundle.getStringExtra("time"));
         }
 
+        //setting up notification things
         v = (Vibrator) getSystemService(this.VIBRATOR_SERVICE);
         mpWait = MediaPlayer.create(this, R.raw.wait);
         mpBegin = MediaPlayer.create(this, R.raw.begin);
 
+        //buttons
         sendDataButton = (Button)findViewById(R.id.send_data_button);
         sendDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,14 +165,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         collectedData = "";
 
+        //risk
+        pushDuration = new ArrayList<>();
+        liftDuration = new ArrayList<>();
+        pushFrequency = new ArrayList<>();
+        liftFrequency = new ArrayList<>();
+
+        Map<String, String>  params = new HashMap<String, String>();
+        params.put("_id", userID);
+        params.put("token", userToken);
+        params.put("url", riskUrl);
+
+        RiskRequest mRisk = new RiskRequest(params);
+        mRisk.execute((Void) null);
+
+        //sensors
         mSensorManager = (SensorManager) getSystemService(this.SENSOR_SERVICE);
         mSensorAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mSensorLinAccel = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
+        //speech recognition
         mSpeech = SpeechRecognizer.createSpeechRecognizer(this);
 
-        mSpeech.setRecognitionListener(new speechListener());
+        mSpeech.setRecognitionListener(new SpeechListener());
 
         speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -236,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         mSpeech = SpeechRecognizer.createSpeechRecognizer(this);
 
-        mSpeech.setRecognitionListener(new speechListener());
+        mSpeech.setRecognitionListener(new SpeechListener());
 
         speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -415,7 +433,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //Log.e("TAG", "DATA COLLECTED");
     }
 
-    private void sendData(){
+    private void sendData() {
         //Log.e("TAG", "ATTEMPTING TO SEND DATA");
 
         if (mDataTask != null) {
@@ -434,102 +452,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mDataTask.execute((Void) null);
     }
 
-    public class SendDataTask extends AsyncTask<Void, Void, Boolean> {
-
-        // This is the data we are sending
-        JSONObject postData;
-
-        // This is a constructor that allows you to pass in the JSON body
-        public SendDataTask(Map<String, String> postData) {
-            if (postData != null) {
-                this.postData = new JSONObject(postData);
-            }
-        }
-
-        // This is a function that we are overriding from AsyncTask. It takes Strings as parameters because that is what we defined for the parameters of our async task
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            try {
-                // This is getting the url from the string we passed in
-                URL url = new URL(dataUrl);
-
-                // Create the urlConnection
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-
-                urlConnection.setDoInput(true);
-                urlConnection.setDoOutput(true);
-
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-
-                urlConnection.setRequestMethod("POST");
-
-
-                // OPTIONAL - Sets an authorization header
-                urlConnection.setRequestProperty("Authorization", "someAuthString");
-
-                // Send the post body
-                if (this.postData != null) {
-                    //Make the file we want to send
-                    /*File file = new File(getFilesDir(), "postData");
-                    FileOutputStream outputStream;
-
-                    try {
-                        outputStream = openFileOutput("postData", MODE_PRIVATE);
-                        outputStream.write(postData.toString().getBytes());
-                        outputStream.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }*/
-
-                    OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream());
-                    writer.write(postData.toString());
-                    writer.flush();
-                }
-
-                int statusCode = urlConnection.getResponseCode();
-
-                if (statusCode == 200) {
-
-                    InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
-
-                    String response = convertInputStreamToString(inputStream);
-
-                    Log.e("DATA RESPONSE", response);
-                    return true;
-                    // From here you can convert the string to JSON with whatever JSON parser you like to use
-                    // After converting the string to JSON, I call my custom callback. You can follow this process too, or you can implement the onPostExecute(Result) method
-                } else {
-                    // Status code is not 200
-                    // Do something to handle the error
-                    Log.e("DATA ERROR", "Couldn't send data");
-                    return false;
-                }
-
-            } catch (Exception e) {
-                Log.d("TAG", e.getLocalizedMessage());
-                return false;
-            }
-
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mDataTask = null;
-
-            if (success) {
-                Log.e("DATAMESSAGE", "Data Sent");
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mDataTask = null;
-        }
-    }
-
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+    protected static String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
         String line = "";
         String result = "";
@@ -546,7 +469,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         System.out.println(uri);
     }
 
-    public class speechListener implements RecognitionListener
+    //Our implementation of speech listener to get specific words caught
+    public class SpeechListener implements RecognitionListener
     {
 
         @Override
