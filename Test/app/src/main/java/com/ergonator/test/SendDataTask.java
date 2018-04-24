@@ -3,6 +3,7 @@ package com.ergonator.test;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -21,11 +22,34 @@ public class SendDataTask extends AsyncTask<Void, Void, Boolean> {
     JSONObject postData;
     private String dataUrl = "http://10.231.62.128:3000/data";
 
+    private String time = "";
+    private int pDur = 0;
+    private int lDur = 0;
+    private int pFreq = 0;
+    private int lFreq = 0;
+
+
     // This is a constructor that allows you to pass in the JSON body
     public SendDataTask(Map<String, String> postData) {
         if (postData != null) {
             this.postData = new JSONObject(postData);
         }
+    }
+
+    /**
+     * Converts a server response to necessary values
+     * @param response the JSON string from the server
+     */
+    private void convertResponse(String response) {
+        try {
+            JSONObject data = new JSONObject(response);
+
+            time = data.getString("time");
+            pDur = data.getInt("durPush");
+            lDur = data.getInt("durLift");
+            pFreq = data.getInt("freqLift");
+            lFreq = data.getInt("freqPush");
+        } catch (Exception e) {Log.e("JSONConversion Error", e.getMessage());}
     }
 
     // This is a function that we are overriding from AsyncTask. It takes Strings as parameters because that is what we defined for the parameters of our async task
@@ -38,7 +62,6 @@ public class SendDataTask extends AsyncTask<Void, Void, Boolean> {
 
             // Create the urlConnection
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
 
             urlConnection.setDoInput(true);
             urlConnection.setDoOutput(true);
@@ -67,6 +90,8 @@ public class SendDataTask extends AsyncTask<Void, Void, Boolean> {
 
                 String response = convertInputStreamToString(inputStream);
 
+                convertResponse(response);
+
                 Log.e("DATA RESPONSE", response);
                 return true;
                 // From here you can convert the string to JSON with whatever JSON parser you like to use
@@ -90,7 +115,7 @@ public class SendDataTask extends AsyncTask<Void, Void, Boolean> {
         MainActivity.mDataTask = null;
 
         if (success) {
-            Log.e("DATAMESSAGE", "Data Sent");
+            MainActivity.addToRiskArray(time, pDur, lDur, pFreq, lFreq);
         }
     }
 

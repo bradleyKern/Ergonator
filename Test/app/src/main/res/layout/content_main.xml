@@ -78,7 +78,7 @@
             android:layout_marginStart="7dp"
             android:alpha="1"
             android:tintMode="screen"
-            app:srcCompat="@drawable/male_red" />
+            app:srcCompat="@drawable/male_grayscale" />
 
         <ImageView
             android:id="@+id/risk_level_text"

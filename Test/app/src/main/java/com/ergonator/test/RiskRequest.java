@@ -43,6 +43,10 @@ public class RiskRequest extends AsyncTask<Void, Void, Boolean> {
         liftFrequency = new ArrayList<>();
     }
 
+    /**
+     * Converts a server response to necessary arrays
+     * @param response the JSON string from the server
+     */
     private void convertResponse(String response) {
         try {
             JSONObject data = new JSONObject(response);

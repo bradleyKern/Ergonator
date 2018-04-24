@@ -29,6 +29,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jjoe64.graphview.GraphView;
@@ -106,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static ArrayList<Integer> pushFrequency;
     private static ArrayList<Integer> liftFrequency;
 
-
     //All Sensor Data Values
     private float accelX = 0;
     private float accelY = 0;
@@ -117,6 +117,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float linAccelX = 0;
     private float linAccelY = 0;
     private float linAccelZ = 0;
+    private static int durationRisk = 0;
+    private static int frequencyRisk = 0;
+    private static int maxRisk = 0;
 
     //battery
     private IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -444,6 +447,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         liftFrequency = liftFreq;
     }
 
+    public static void addToRiskArray(String time, int pushDur, int liftDur, int pushFreq, int liftFreq) {
+        riskTimes.add(time);
+        pushDuration.add(pushDur);
+        liftDuration.add(liftDur);
+        pushFrequency.add(pushFreq);
+        liftFrequency.add(liftFreq);
+
+        durationRisk = pushDur + liftDur;
+        frequencyRisk = pushFreq + liftFreq;
+        maxRisk = Math.max(durationRisk, frequencyRisk);
+    }
+
     private void collectData(){
         String dataString = "";
         dataString += ((System.currentTimeMillis() - startTime) / 100.0) + ",";
@@ -490,6 +505,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             batteryLow();
         }
 
+        updateUI();
+    }
+
+    private void updateUI() {
+        switch(maxRisk) {
+            case 0:
+                ((ImageView)findViewById(R.id.silhouette)).setImageResource(R.drawable.male_green);
+                break;
+            case 1:
+                ((ImageView)findViewById(R.id.silhouette)).setImageResource(R.drawable.male_green_yellow);
+                break;
+            case 2:
+                ((ImageView)findViewById(R.id.silhouette)).setImageResource(R.drawable.male_yellow_red);
+                break;
+            case 3:
+                ((ImageView)findViewById(R.id.silhouette)).setImageResource(R.drawable.male_red);
+                break;
+        }
     }
 
     protected static String convertInputStreamToString(InputStream inputStream) throws IOException {
