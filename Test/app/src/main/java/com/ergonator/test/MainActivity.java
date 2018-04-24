@@ -100,10 +100,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     //risk values
     private String riskUrl = "http://10.231.62.128:3000/history";
-    private ArrayList<Integer> pushDuration;
-    private ArrayList<Integer> liftDuration;
-    private ArrayList<Integer> pushFrequency;
-    private ArrayList<Integer> liftFrequency;
+    private static ArrayList<String>  riskTimes;
+    private static ArrayList<Integer> pushDuration;
+    private static ArrayList<Integer> liftDuration;
+    private static ArrayList<Integer> pushFrequency;
+    private static ArrayList<Integer> liftFrequency;
 
 
     //All Sensor Data Values
@@ -379,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        GraphFragment fragment = new GraphFragment();
+        GraphFragment fragment = GraphFragment.newInstance(riskTimes, pushDuration, liftDuration, pushFrequency, liftFrequency);
         fragmentTransaction.add(R.id.layout, fragment);
         fragmentTransaction.commit();
     }
@@ -433,6 +434,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         inFragment = false;
         mSpeech.startListening(speechIntent);
+    }
+
+    public static void setRiskArrays(ArrayList<String> times, ArrayList<Integer> pushDur, ArrayList<Integer> liftDur, ArrayList<Integer> pushFreq, ArrayList<Integer> liftFreq) {
+        riskTimes = times;
+        pushDuration = pushDur;
+        liftDuration = liftDur;
+        pushFrequency = pushFreq;
+        liftFrequency = liftFreq;
     }
 
     private void collectData(){

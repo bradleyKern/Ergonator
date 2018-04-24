@@ -3,11 +3,15 @@ package com.ergonator.test;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -20,11 +24,44 @@ public class RiskRequest extends AsyncTask<Void, Void, Boolean> {
     String userID;
     String userToken;
 
+    private ArrayList<String> riskTimes;
+    private ArrayList<Integer> pushDuration;
+    private ArrayList<Integer> liftDuration;
+    private ArrayList<Integer> pushFrequency;
+    private ArrayList<Integer> liftFrequency;
+
     // This is a constructor that allows you to pass in the JSON body
     public RiskRequest(Map<String, String> data) {
         riskUrl = data.get("url");
         userID = data.get("_id");
         userToken = data.get("token");
+
+        riskTimes = new ArrayList<>();
+        pushDuration = new ArrayList<>();
+        liftDuration = new ArrayList<>();
+        pushFrequency = new ArrayList<>();
+        liftFrequency = new ArrayList<>();
+    }
+
+    private void convertResponse(String response) {
+        try {
+            JSONObject data = new JSONObject(response);
+
+            JSONArray times = data.getJSONArray("times");
+            JSONArray pDur = data.getJSONArray("durPush");
+            JSONArray lDur = data.getJSONArray("durLift");
+            JSONArray pFreq = data.getJSONArray("freqLift");
+            JSONArray lFreq = data.getJSONArray("freqPush");
+
+            for (int i = 0; i < times.length(); i++) {
+                riskTimes.add(times.getString(i));
+                pushDuration.add(pDur.getInt(i));
+                liftDuration.add(lDur.getInt(i));
+                pushFrequency.add(pFreq.getInt(i));
+                liftFrequency.add(lFreq.getInt(i));
+            }
+
+        } catch (Exception e) {Log.e("JSONConversion Error", e.getMessage());}
     }
 
     // This is a function that we are overriding from AsyncTask. It takes Strings as parameters because that is what we defined for the parameters of our async task
@@ -51,17 +88,10 @@ public class RiskRequest extends AsyncTask<Void, Void, Boolean> {
 
             int statusCode = urlConnection.getResponseCode();
 
-            Log.d("GET", "here3");
-
             if (statusCode == 200) {
-
                 InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
-
                 String response = convertInputStreamToString(inputStream);
-
-                Log.d("DATA RESPONSE", response);
-                // From here you can convert the string to JSON with whatever JSON parser you like to use
-                // After converting the string to JSON, I call my custom callback. You can follow this process too, or you can implement the onPostExecute(Result) method
+                convertResponse(response);
                 return true;
             } else {
                 // Status code is not 200
@@ -79,7 +109,7 @@ public class RiskRequest extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected void onPostExecute(final Boolean success) {
         if (success) {
-            Log.e("DATAMESSAGE", "Data Sent");
+            MainActivity.setRiskArrays(riskTimes, pushDuration, liftDuration, pushFrequency, liftFrequency);
         }
     }
 
