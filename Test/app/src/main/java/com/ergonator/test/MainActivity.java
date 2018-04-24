@@ -518,15 +518,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         switch(maxRisk) {
             case 0:
                 ((ImageView)findViewById(R.id.silhouette)).setImageResource(R.drawable.male_green);
+                ((ImageView)findViewById(R.id.risk_level_text)).setImageResource(R.drawable.low);
                 break;
             case 1:
                 ((ImageView)findViewById(R.id.silhouette)).setImageResource(R.drawable.male_green_yellow);
+                ((ImageView)findViewById(R.id.risk_level_text)).setImageResource(R.drawable.moderate);
                 break;
             case 2:
                 ((ImageView)findViewById(R.id.silhouette)).setImageResource(R.drawable.male_yellow_red);
+                ((ImageView)findViewById(R.id.risk_level_text)).setImageResource(R.drawable.moderate);
                 break;
             case 3:
                 ((ImageView)findViewById(R.id.silhouette)).setImageResource(R.drawable.male_red);
+                ((ImageView)findViewById(R.id.risk_level_text)).setImageResource(R.drawable.high);
                 break;
         }
     }

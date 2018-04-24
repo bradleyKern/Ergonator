@@ -78,7 +78,7 @@
             android:layout_marginStart="7dp"
             android:alpha="1"
             android:tintMode="screen"
-            app:srcCompat="@drawable/male_grayscale" />
+            app:srcCompat="@drawable/male_green" />
 
         <ImageView
             android:id="@+id/risk_level_text"
@@ -87,7 +87,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_marginTop="330dp"
-            app:srcCompat="@drawable/high" />
+            app:srcCompat="@drawable/low" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

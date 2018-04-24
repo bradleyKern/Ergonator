@@ -15,8 +15,6 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        Log.e("TAG", "SPLASH SCREEEEEEEEEEEEEEENNNNNNNNNNN");
-
         new Handler().postDelayed(new Runnable(){
             @Override
             public void run() {
