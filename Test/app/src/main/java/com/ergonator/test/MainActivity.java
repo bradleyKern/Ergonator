@@ -505,10 +505,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             batteryLow();
         }
 
-        updateUI();
+        //Prevents errors - see https://stackoverflow.com/questions/5161951/android-only-the-original-thread-that-created-a-view-hierarchy-can-touch-its-vi
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateRiskUI();
+            }
+        });
     }
 
-    private void updateUI() {
+    private void updateRiskUI() {
         switch(maxRisk) {
             case 0:
                 ((ImageView)findViewById(R.id.silhouette)).setImageResource(R.drawable.male_green);
