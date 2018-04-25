@@ -28,6 +28,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -87,9 +90,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // globally
     private Timer dataCollectTimer;
     private Timer dataSendTimer;
-    private Button sendDataButton;
-    private Button viewGraphButton;
-    private Button viewSettingsButton;
+    private ImageView sendDataButton;
+    private ImageView viewGraphButton;
+    private ImageView viewSettingsButton;
     private boolean inFragment = false;
 
     //collected data is separated by new lines
@@ -148,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mpBegin = MediaPlayer.create(this, R.raw.begin);
 
         //buttons
-        sendDataButton = (Button)findViewById(R.id.send_data_button);
+        sendDataButton = (ImageView)findViewById(R.id.send_data_button);
         sendDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -156,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-        viewGraphButton = (Button)findViewById(R.id.view_graph_button);
+        viewGraphButton = (ImageView)findViewById(R.id.view_graph_button);
         viewGraphButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -166,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-        viewSettingsButton = (Button)findViewById(R.id.settings);
+        viewSettingsButton = (ImageView)findViewById(R.id.settings);
         viewSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -307,7 +310,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void startSendingData()
     {
-        sendDataButton.setText("Starting...");
+        sendDataButton.setImageResource(android.R.drawable.ic_menu_rotate);
+        RotateAnimation anim = new RotateAnimation(0f, 350f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        anim.setInterpolator(new LinearInterpolator());
+        anim.setRepeatCount(Animation.INFINITE);
+        anim.setDuration(700);
+        sendDataButton.startAnimation(anim);
         v.vibrate(400);
 
         mpWait.start();
@@ -335,7 +343,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 }, timeShift, timeShift);
 
-                sendDataButton.setText("Stop Sending Data");
+                sendDataButton.setAnimation(null);
+                sendDataButton.setImageResource(android.R.drawable.ic_media_pause);
                 sendDataButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -358,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         sendData();
 
-        sendDataButton.setText("Start Sending Data");
+        sendDataButton.setImageResource(android.R.drawable.ic_media_play);
 
         sendDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -374,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         dataCollectTimer.cancel();
         v.vibrate(1000);
         mSpeech.cancel();
-        sendDataButton.setText("Battery Low!");
+        sendDataButton.setImageResource(android.R.drawable.ic_lock_idle_low_battery);
         sendDataButton.setOnClickListener(null);
     }
 
