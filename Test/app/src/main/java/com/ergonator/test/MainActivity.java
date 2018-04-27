@@ -62,7 +62,10 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener, GraphFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener,
+        MenuFragment.OnFragmentInteractionListener, GraphFragment.OnFragmentInteractionListener,
+        SettingsFragment.OnFragmentInteractionListener, PersonalFragment.OnFragmentInteractionListener,
+        HelpFragment.OnFragmentInteractionListener, ProjectFragment.OnFragmentInteractionListener {
 
     private Sensor mSensorAccel;
     private Sensor mSensorGyro;
@@ -84,15 +87,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private MediaPlayer mpBegin;
 
     //sensor settings
-    private int samplingRate = 8; //sampling rate in milliseconds
-    private int timeShift = 15000; //time between data transfer in milliseconds
+    protected static int samplingRate = 8; //sampling rate in milliseconds
+    protected static int timeShift = 15000; //time between data transfer in milliseconds
 
     // globally
     private Timer dataCollectTimer;
     private Timer dataSendTimer;
     private ImageView sendDataButton;
     private ImageView viewGraphButton;
-    private ImageView viewSettingsButton;
+    private ImageView viewMenuButton;
     private boolean inFragment = false;
 
     //collected data is separated by new lines
@@ -103,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private long startTime = 0;
 
     //risk values
-    private String riskUrl = "http://10.231.62.128:3000/history";
+    private String riskUrl = "http://192.168.1.127:3000/history";
     private static ArrayList<String>  riskTimes;
     private static ArrayList<Integer> pushDuration;
     private static ArrayList<Integer> liftDuration;
@@ -169,19 +172,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-        viewSettingsButton = (ImageView)findViewById(R.id.settings);
-        viewSettingsButton.setOnClickListener(new View.OnClickListener() {
+        viewMenuButton = (ImageView)findViewById(R.id.menu);
+        viewMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mSpeech.stopListening();
                 inFragment = true;
-                showSettings();
+                showMenu();
             }
         });
 
         collectedData = "";
 
         //risk
+        riskTimes = new ArrayList<>();
+        riskTimes = new ArrayList<>();
         pushDuration = new ArrayList<>();
         liftDuration = new ArrayList<>();
         pushFrequency = new ArrayList<>();
@@ -310,7 +315,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void startSendingData()
     {
-        sendDataButton.setImageResource(android.R.drawable.ic_menu_rotate);
+        sendDataButton.setImageResource(android.R.drawable.ic_popup_sync);
         RotateAnimation anim = new RotateAnimation(0f, 350f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         anim.setInterpolator(new LinearInterpolator());
         anim.setRepeatCount(Animation.INFINITE);
@@ -403,12 +408,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSpeech.startListening(speechIntent);
     }
 
-    //Shows the settings fragment
-    private void showSettings()
+    public void showMenu()
     {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        SettingsFragment fragment = SettingsFragment.newInstance(""+samplingRate, ""+timeShift);
+        MenuFragment fragment = new MenuFragment();
         fragmentTransaction.add(R.id.layout, fragment);
         fragmentTransaction.commit();
     }

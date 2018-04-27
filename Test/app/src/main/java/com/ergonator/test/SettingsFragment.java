@@ -43,7 +43,7 @@ public class SettingsFragment extends Fragment {
 
     //constants
     private final int SAMPLING_RATE_MINIMUM = 125;
-    private final int SAMPLING_RATE_INCREMENT = 15;
+    private final int SAMPLING_RATE_INCREMENT = 25;
     private final int TIME_RATE_MINIMUM = 15;
     private final int TIME_RATE_INCREMENT = 15;
 
@@ -174,10 +174,10 @@ public class SettingsFragment extends Fragment {
                 if (fragment != null) {
                     ((MainActivity) getActivity()).returnFromSettings(rateBar.getProgress() + SAMPLING_RATE_MINIMUM, timeBar.getProgress() + TIME_RATE_MINIMUM);
 
-                    // Create and commit the transaction to remove the fragment.
-                    FragmentTransaction fragmentTransaction =
-                            fragmentManager.beginTransaction();
-                    fragmentTransaction.remove(fragment).commit();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    MenuFragment menu = new MenuFragment();
+                    fragmentTransaction.replace(R.id.layout, menu);
+                    fragmentTransaction.commit();
                 }
             }
         });

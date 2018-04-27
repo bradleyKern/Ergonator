@@ -147,9 +147,12 @@ public class GraphFragment extends Fragment {
         graph.getViewport().setYAxisBoundsManual(true);
         graph.getViewport().setMinY(0);
         graph.getViewport().setMaxY(4);
-        graph.getViewport().setXAxisBoundsManual(true);
-        graph.getViewport().setMinX(pushDur[0].getX());
-        graph.getViewport().setMaxX(pushDur[pushDur.length - 1].getX());
+
+        if (riskTimes.size() != 0) { //if there is data
+            graph.getViewport().setXAxisBoundsManual(true);
+            graph.getViewport().setMinX(pushDur[0].getX());
+            graph.getViewport().setMaxX(pushDur[pushDur.length - 1].getX());
+        }
 
         graph.getViewport().setScrollable(true);
         graph.getViewport().setScalable(true);

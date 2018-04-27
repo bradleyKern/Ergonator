@@ -18,13 +18,16 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/settings"
+            android:id="@+id/menu"
             android:layout_width="62dp"
             android:layout_height="0dp"
+            android:scaleX=".7"
+            android:scaleY=".8"
             android:textColor="#ffffff"
+            android:tint="#989898"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_manage" />
+            app:srcCompat="@drawable/ic_bars" />
 
         <ImageView
             android:id="@+id/view_graph_button"
