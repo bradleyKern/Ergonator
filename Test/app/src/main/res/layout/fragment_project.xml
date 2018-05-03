@@ -1,4 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,18 +17,53 @@
             android:src="@android:drawable/ic_menu_revert" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingVertical="3dp">
+            android:paddingVertical="3dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            tools:layout_editor_absoluteX="0dp">
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp"
                 android:gravity="center_horizontal"
                 android:text="Project Ergon"
                 android:textAppearance="@android:style/TextAppearance.Material.Large" />
+
+            <ImageView
+                android:id="@+id/ergonPic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ergon" />
+
+            <TextView
+                android:id="@+id/desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Project Ergon is a TAMU Construction Science project that enrolls mobile sensor data to determine worker risk"
+                android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+            <TextView
+                android:id="@+id/links"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:text="Some helful links:\n\tOSHA: https://www.osha.gov/SLTC/ergonomics\n\tNIOSH: https://www.cdc.gov/niosh/topics/ergonomics/default.html\n\tRULA: http://ergo-plus.com/rula-assessment-tool-guide/"
+                android:textColorLink="?android:attr/textColorLink" />
+
+            <TextView
+                android:id="@+id/about"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:text="About:\n\tVersion: 1.0\n\tContact and Issues: https://github.com/bradleyKern/Ergonator/issues\n\tConnect:\n\t\tciber@tamu: http://people.tamu.edu/~abehzadan/\n\t\tFacebook: https://www.facebook.com/ciber.tamu/" />
 
         </LinearLayout>
 

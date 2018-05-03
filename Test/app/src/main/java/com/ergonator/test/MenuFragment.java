@@ -24,12 +24,12 @@ import android.widget.ImageView;
 public class MenuFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM1 = "_id";
+    private static final String ARG_PARAM2 = "token";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String userID;
+    private String userToken;
 
     private ImageView closeButton;
     private Button personalButton;
@@ -49,16 +49,16 @@ public class MenuFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param id Parameter 1.
+     * @param token Parameter 2.
      * @return A new instance of fragment MenuFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MenuFragment newInstance(String param1, String param2) {
+    public static MenuFragment newInstance(String id, String token) {
         MenuFragment fragment = new MenuFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM1, id);
+        args.putString(ARG_PARAM2, token);
         fragment.setArguments(args);
         return fragment;
     }
@@ -67,8 +67,8 @@ public class MenuFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            userID = getArguments().getString(ARG_PARAM1);
+            userToken = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -86,6 +86,8 @@ public class MenuFragment extends Fragment {
                 FragmentManager fragmentManager = getFragmentManager();
 
                 if (fragment != null) {
+                    ((MainActivity) getActivity()).returnFromMenu();
+
                     // Create and commit the transaction to remove the fragment.
                     FragmentTransaction fragmentTransaction =
                             fragmentManager.beginTransaction();
@@ -134,7 +136,7 @@ public class MenuFragment extends Fragment {
     {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        PersonalFragment personal = new PersonalFragment();
+        PersonalFragment personal = PersonalFragment.newInstance(userID, userToken);
         fragmentTransaction.replace(R.id.layout, personal);
         fragmentTransaction.commit();
     }

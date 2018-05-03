@@ -221,25 +221,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public void onBackPressed() {
+        if (inFragment)
+            return;
     }
 
     @Override
@@ -412,9 +396,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        MenuFragment fragment = new MenuFragment();
+        MenuFragment fragment = MenuFragment.newInstance(userID, userToken);
         fragmentTransaction.add(R.id.layout, fragment);
         fragmentTransaction.commit();
+    }
+
+    public void returnFromMenu()
+    {
+        inFragment = false;
+        mSpeech.startListening(speechIntent);
     }
 
     /**
@@ -445,11 +435,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //convert to milliseconds by multiplying by 1000
         timeShift = newTime * 1000;
-
-        Log.d("NEW RATE", "" + newRate);
-
-        inFragment = false;
-        mSpeech.startListening(speechIntent);
     }
 
     public static void setRiskArrays(ArrayList<String> times, ArrayList<Integer> pushDur, ArrayList<Integer> liftDur, ArrayList<Integer> pushFreq, ArrayList<Integer> liftFreq) {

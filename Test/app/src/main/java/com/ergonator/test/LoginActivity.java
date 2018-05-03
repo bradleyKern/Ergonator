@@ -75,8 +75,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private UserLoginTask mAuthTask = null;
     private UserRegisterTask mRegisTask = null;
-    private String loginUrl = "http://10.231.62.128:3000/login";
-    private String registrationUrl = "http://10.231.62.128:3000/register";
+    private String loginUrl = "http://192.168.1.127:3000/login";
+    private String registrationUrl = "http://192.168.1.127:3000/register";
     private String userID = "";
     private String userToken = "";
     private boolean isSupervisor = false;
@@ -523,12 +523,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     void debugLogin()
     {
-        Intent intentBundle = new Intent(LoginActivity.this, MainActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("_id", "debugID");
-        bundle.putString("token", "debugToken");
-        intentBundle.putExtras(bundle);
-        startActivity(intentBundle);
+        mUsernameView.setText("alex");
+        mPasswordView.setText("password");
+        attemptLogin();
     }
 
     private static String convertInputStreamToString(InputStream inputStream) throws IOException{
