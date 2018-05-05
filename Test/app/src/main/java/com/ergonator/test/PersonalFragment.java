@@ -130,7 +130,7 @@ public class PersonalFragment extends Fragment {
                     mInfo.execute((Void) null);
 
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    MenuFragment menu = new MenuFragment();
+                    MenuFragment menu = MenuFragment.newInstance(userID, token);
                     fragmentTransaction.replace(R.id.layout, menu);
                     fragmentTransaction.commit();
                 }
@@ -230,7 +230,7 @@ public class PersonalFragment extends Fragment {
                 age = data.getString("age");
                 risk = data.getString("risk");
             } catch (Exception e) {
-                Log.e("JSONConversion Error", e.getMessage());}
+                Log.e("JSONConversion Error", e.getMessage() + " " + response);}
         }
 
         // This is a function that we are overriding from AsyncTask. It takes Strings as parameters because that is what we defined for the parameters of our async task

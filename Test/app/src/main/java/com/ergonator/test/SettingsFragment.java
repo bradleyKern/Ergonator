@@ -34,6 +34,8 @@ public class SettingsFragment extends Fragment {
     private String mParam2;
     private int rate;
     private int time;
+    private String userID;
+    private String token;
 
     private ImageView closeButton;
 
@@ -65,11 +67,13 @@ public class SettingsFragment extends Fragment {
      * @return A new instance of fragment SettingsFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static SettingsFragment newInstance(String param1, String param2) {
+    public static SettingsFragment newInstance(String param1, String param2, String id, String tok) {
         SettingsFragment fragment = new SettingsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
+        args.putString("userID", id);
+        args.putString("token", tok);
         fragment.setArguments(args);
         return fragment;
     }
@@ -80,6 +84,9 @@ public class SettingsFragment extends Fragment {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+
+            userID = getArguments().getString("userID");
+            token = getArguments().getString("token");
 
             rate = Integer.parseInt(mParam1);
 
@@ -175,7 +182,7 @@ public class SettingsFragment extends Fragment {
                     ((MainActivity) getActivity()).returnFromSettings(rateBar.getProgress() + SAMPLING_RATE_MINIMUM, timeBar.getProgress() + TIME_RATE_MINIMUM);
 
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    MenuFragment menu = new MenuFragment();
+                    MenuFragment menu = MenuFragment.newInstance(userID, token);
                     fragmentTransaction.replace(R.id.layout, menu);
                     fragmentTransaction.commit();
                 }

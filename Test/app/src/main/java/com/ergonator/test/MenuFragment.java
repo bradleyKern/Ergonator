@@ -146,7 +146,7 @@ public class MenuFragment extends Fragment {
     {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        SettingsFragment settings = SettingsFragment.newInstance(""+MainActivity.samplingRate, ""+MainActivity.timeShift);
+        SettingsFragment settings = SettingsFragment.newInstance(""+MainActivity.samplingRate, ""+MainActivity.timeShift, userID, userToken);
         fragmentTransaction.replace(R.id.layout, settings);
         fragmentTransaction.commit();
     }
@@ -156,7 +156,7 @@ public class MenuFragment extends Fragment {
     {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        HelpFragment help = new HelpFragment();
+        HelpFragment help = HelpFragment.newInstance(userID, userToken);
         fragmentTransaction.replace(R.id.layout, help);
         fragmentTransaction.commit();
     }
@@ -166,7 +166,7 @@ public class MenuFragment extends Fragment {
     {
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        ProjectFragment project = new ProjectFragment();
+        ProjectFragment project = ProjectFragment.newInstance(userID, userToken);
         fragmentTransaction.replace(R.id.layout, project);
         fragmentTransaction.commit();
     }

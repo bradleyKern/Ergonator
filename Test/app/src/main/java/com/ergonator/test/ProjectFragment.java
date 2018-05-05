@@ -23,6 +23,8 @@ import android.widget.ImageView;
 public class ProjectFragment extends Fragment {
 
     private ImageView closeButton;
+    private String userID;
+    private String token;
     private ProjectFragment fragment;
 
     private OnFragmentInteractionListener mListener;
@@ -37,9 +39,11 @@ public class ProjectFragment extends Fragment {
      *
      * @return A new instance of fragment ProjectFragment.
      */
-    public static ProjectFragment newInstance() {
+    public static ProjectFragment newInstance(String id, String tok)  {
         ProjectFragment fragment = new ProjectFragment();
         Bundle args = new Bundle();
+        args.putString("userID", id);
+        args.putString("token", tok);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,6 +52,8 @@ public class ProjectFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            userID = getArguments().getString("userID");
+            token = getArguments().getString("token");
         }
     }
 
@@ -68,7 +74,7 @@ public class ProjectFragment extends Fragment {
 
                 if (fragment != null) {
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    MenuFragment menu = new MenuFragment();
+                    MenuFragment menu = MenuFragment.newInstance(userID, token);
                     fragmentTransaction.replace(R.id.layout, menu);
                     fragmentTransaction.commit();
                 }

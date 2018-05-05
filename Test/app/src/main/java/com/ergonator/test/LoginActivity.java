@@ -521,7 +521,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     void debugLogin()
     {
-        mUsernameView.setText("alex");
+        mUsernameView.setText("ryan");
         mPasswordView.setText("password");
         attemptLogin();
     }

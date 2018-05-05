@@ -24,6 +24,8 @@ import android.widget.TextView;
 public class HelpFragment extends Fragment {
 
     private ImageView closeButton;
+    private String userID;
+    private String token;
     private HelpFragment fragment;
 
     private OnFragmentInteractionListener mListener;
@@ -37,9 +39,11 @@ public class HelpFragment extends Fragment {
      * this fragment using the provided parameters.
      * @return A new instance of fragment HelpFragment.
      */
-    public static HelpFragment newInstance() {
+    public static HelpFragment newInstance(String id, String tok) {
         HelpFragment fragment = new HelpFragment();
         Bundle args = new Bundle();
+        args.putString("userID", id);
+        args.putString("token", tok);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,6 +52,8 @@ public class HelpFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            userID = getArguments().getString("userID");
+            token = getArguments().getString("token");
         }
     }
 
@@ -68,7 +74,7 @@ public class HelpFragment extends Fragment {
 
                 if (fragment != null) {
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    MenuFragment menu = new MenuFragment();
+                    MenuFragment menu = MenuFragment.newInstance(userID, token);
                     fragmentTransaction.replace(R.id.layout, menu);
                     fragmentTransaction.commit();
                 }
