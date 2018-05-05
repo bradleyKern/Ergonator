@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private long startTime = 0;
 
     //risk values
-    private String riskUrl = "http://192.168.1.127:3000/history";
+    private String riskUrl = LoginActivity.IPANDPORT + "/history";
     private static ArrayList<String>  riskTimes;
     private static ArrayList<Integer> pushDuration;
     private static ArrayList<Integer> liftDuration;

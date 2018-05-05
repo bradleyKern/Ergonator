@@ -52,7 +52,7 @@ public class PersonalFragment extends Fragment {
     private PersonalFragment fragment;
     private String userID;
     private String token;
-    private final String INFO_URL = "http://192.168.1.127:3000/profile";
+    private final String INFO_URL = LoginActivity.IPANDPORT + "/profile";
 
     private OnFragmentInteractionListener mListener;
 

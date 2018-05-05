@@ -67,16 +67,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
+    protected static final String IPANDPORT = "http://10.231.62.128:3000";
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
     private UserRegisterTask mRegisTask = null;
-    private String loginUrl = "http://192.168.1.127:3000/login";
-    private String registrationUrl = "http://192.168.1.127:3000/register";
+    private String loginUrl = IPANDPORT + "/login";
+    private String registrationUrl = IPANDPORT + "/register";
     private String userID = "";
     private String userToken = "";
     private boolean isSupervisor = false;

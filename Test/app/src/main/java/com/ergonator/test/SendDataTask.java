@@ -20,7 +20,7 @@ public class SendDataTask extends AsyncTask<Void, Void, Boolean> {
 
     // This is the data we are sending
     JSONObject postData;
-    private String dataUrl = "http://192.168.1.127:3000/data";
+    private String dataUrl = LoginActivity.IPANDPORT + "/data";
 
     private String time = "";
     private int pDur = 0;
